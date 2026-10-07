@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weather World - Time Edition</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weather World</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-black text-white min-h-screen flex items-center justify-center p-4">
-<div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+<div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
 <h1 class="text-2xl font-bold text-center">🌍 Weather World</h1>
 <p id="loc" class="text-zinc-400 text-sm text-center mt-1">Type a city and press Go</p>
-<p id="clock" class="text-violet-400 font-mono text-center text-lg font-bold mt-2">🕒 --:--:--</p>
+<p id="clock" class="text-violet-400 text-center font-bold mt-2">🕒 Loading...</p>
 
 <div class="flex gap-2 mt-4">
-<input id="city" placeholder="Search city... e.g. Beijing" class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none focus:border-violet-500">
-<button onclick="getWeather()" class="bg-violet-600 hover:bg-violet-500 px-6 rounded-xl font-bold">Go</button>
+<input id="city" placeholder="Search... e.g. Beijing" class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none">
+<button onclick="getWeather()" class="bg-violet-600 px-6 rounded-xl font-bold">Go</button>
 </div>
 
 <div class="grid grid-cols-3 gap-2 mt-4">
@@ -29,62 +29,63 @@
 </div>
 
 <div id="status" class="text-center text-sm text-zinc-500 mt-4">🔍 Type a city and press Go</div>
-<div id="card" class="hidden mt-4 bg-zinc-800/50 rounded-2xl p-5 border border-zinc-700/50">
-<div class="flex justify-between items-center">
-<div><p id="temp" class="text-5xl font-black">--°</p><p id="cond" class="text-zinc-300">--</p></div>
-<div id="icon" class="text-5xl">⛅</div>
-</div>
-<div class="grid grid-cols-3 gap-3 mt-5 text-center">
-<div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">FEELS LIKE</p><p id="feels" class="font-bold">--°</p></div>
-<div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">HUMIDITY</p><p id="hum" class="font-bold">--%</p></div>
-<div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">WIND</p><p id="wind" class="font-bold">--</p></div>
-</div>
+<div id="card" class="hidden mt-4 bg-zinc-800 rounded-2xl p-5">
+<div class="flex justify-between"><div><p id="temp" class="text-5xl font-black">--°</p><p id="cond" class="text-zinc-300">--</p></div><div id="icon" class="text-5xl">⛅</div></div>
+<div class="grid grid-cols-3 gap-3 mt-5 text-center text-sm"><div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">FEELS</p><p id="feels" class="font-bold">--</p></div><div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">HUMIDITY</p><p id="hum" class="font-bold">--</p></div><div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">WIND</p><p id="wind" class="font-bold">--</p></div></div>
 </div>
 </div>
 
 <script>
-let currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+// SIMPLE CLOCK - 100% working
 function updateClock(){
-  const now = new Date();
-  document.getElementById('clock').innerHTML = '🕒 ' + now.toLocaleTimeString() + ' • ' + now.toDateString();
+  try{
+    const d=new Date();
+    document.getElementById('clock').innerText='🕒 '+d.toLocaleString();
+  }catch(e){}
 }
 setInterval(updateClock,1000);
-  const zone = tz || currentTZ;
-  const now = new Date().toLocaleString('en-IN', {timeZone: zone, weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
-  const el=document.getElementById('clock');
-  if(el) el.innerHTML = '🕒 ' + now + (tz? ' • ' + zone.split('/').pop().replace('_',' ') : '');
-}
-setInterval(()=>updateClock(currentTZ),1000);
 updateClock();
 
-const map={0:'Clear Sky',1:'Mainly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',51:'Light Drizzle',61:'Light Rain',71:'Light Snow',80:'Light Showers',95:'Thunderstorm'};
-const icons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',71:'❄️',80:'🌦️',95:'⛈️'};
-
-function quick(c){document.getElementById('city').value=c; getWeather();}
+function quick(c){ document.getElementById('city').value=c; getWeather(); }
 
 async function getWeather(){
- let city=document.getElementById('city').value.trim(); if(!city) return;
- const stateMap={'rajasthan':'Jaipur','australia':'Sydney','china':'Beijing','punjab':'Chandigarh','up':'Lucknow'};
-  let lower=city.toLowerCase(); if(stateMap[lower]) city=stateMap[lower];
- const status=document.getElementById('status'), card=document.getElementById('card'), loc=document.getElementById('loc');
- status.textContent='🔍 Searching '+city+'...'; card.classList.add('hidden');
- try{
-  let geo=await fetch(https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json).then(r=>r.json());
-  if(!geo.results) throw new Error('City not found');
-  let g=geo.results[0];
-  loc.textContent=g.name+', '+(g.admin1'')+' '+(g.country'')+' • '+g.latitude.toFixed(2)+','+g.longitude.toFixed(2);
-  let w=await fetch(https://api.open-meteo.com/v1/forecast?latitude=${g.latitude}&longitude=${g.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto).then(r=>r.json());
-  let c=w.current;
-  document.getElementById('temp').textContent=Math.round(c.temperature_2m)+'°C';
-  document.getElementById('cond').textContent=map[c.weather_code]||'Cloudy';
-  document.getElementById('icon').textContent=icons[c.weather_code]||'⛅';
-  document.getElementById('feels').textContent=Math.round(c.apparent_temperature)+'°C';
-  document.getElementById('hum').textContent=c.relative_humidity_2m+'%';
-  document.getElementById('wind').textContent=c.wind_speed_10m+' km/h';
-  status.textContent='✅ Live weather for '+g.name; card.classList.remove('hidden');
- }catch(e){ status.textContent='❌ '+e.message; }
+  const cityInput=document.getElementById('city');
+  let city=cityInput.value.trim();
+  if(!city){ alert('Type a city name'); return; }
+  const map2={'rajasthan':'Jaipur','australia':'Sydney','china':'Beijing'};
+  if(map2[city.toLowerCase()]) city=map2[city.toLowerCase()];
+
+  const status=document.getElementById('status'), card=document.getElementById('card'), loc=document.getElementById('loc');
+  status.innerText='🔍 Searching '+city+'...';
+  card.classList.add('hidden');
+
+  try{
+    const geoRes=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=en&format=json');
+    const geo=await geoRes.json();
+    if(!geo.results || geo.results.length==0) throw new Error('City not found');
+    const g=geo.results[0];
+    loc.innerText=g.name+', '+(g.country||'');
+
+    const wRes=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+g.latitude+'&longitude='+g.longitude+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto');
+    const w=await wRes.json();
+    const c=w.current;
+    const weatherText={0:'Clear Sky',1:'Mainly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',51:'Light Drizzle',61:'Light Rain',71:'Light Snow',80:'Light Showers',95:'Thunderstorm'};
+    const weatherIcon={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',71:'❄️',80:'🌦️',95:'⛈️'};
+
+    document.getElementById('temp').innerText=Math.round(c.temperature_2m)+'°C';
+    document.getElementById('cond').innerText=weatherText[c.weather_code]||'Cloudy';
+    document.getElementById('icon').innerText=weatherIcon[c.weather_code]||'⛅';
+    document.getElementById('feels').innerText=Math.round(c.apparent_temperature)+'°C';
+    document.getElementById('hum').innerText=c.relative_humidity_2m+'%';
+    document.getElementById('wind').innerText=c.wind_speed_10m+' km/h';
+
+    status.innerText='✅ Live weather for '+g.name;
+    card.classList.remove('hidden');
+  }catch(err){
+    status.innerText='❌ '+err.message;
+    console.log(err);
+  }
 }
-window.onload=()=>{document.getElementById('city').value=''; document.getElementById('status').textContent='🔍 Type a city and press Go - Whole World Weather';}
 </script>
 </body>
 </html>
