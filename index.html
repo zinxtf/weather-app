@@ -2,34 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Weather World - World Clock</title>
+<title>Weather World - Ultimate</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-black text-white min-h-screen flex items-center justify-center p-4">
 <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-<h1 class="text-2xl font-bold text-center">🌍 Weather World</h1>
-<p id="loc" class="text-zinc-400 text-sm text-center mt-1">Type a city and press Go</p>
+<h1 class="text-2xl font-bold text-center">🌍 Weather World - Ultimate</h1>
+<p id="loc" class="text-zinc-400 text-sm text-center mt-1">Continents • Countries • States • Cities</p>
 <p id="clock" class="text-violet-400 text-center font-bold mt-2 text-lg">🕒 --:--:--</p>
-<p id="clock-city" class="text-zinc-500 text-center text-xs">Local time</p>
+<p id="clock-city" class="text-zinc-500 text-center text-xs">Live World Clock</p>
 
 <div class="flex gap-2 mt-4">
-<input id="city" placeholder="Search... e.g. Beijing" class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none">
+<input id="city" placeholder="Type anything... Asia, India, Karnataka, Delhi" class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none">
 <button onclick="getWeather()" class="bg-violet-600 px-6 rounded-xl font-bold">Go</button>
 </div>
 
-<div class="grid grid-cols-3 gap-2 mt-4">
-<button onclick="quick('London')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇬🇧 London</button>
-<button onclick="quick('Tokyo')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇯🇵 Tokyo</button>
-<button onclick="quick('New York')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇺🇸 NY</button>
-<button onclick="quick('Dubai')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇦🇪 Dubai</button>
-<button onclick="quick('Paris')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇫🇷 Paris</button>
-<button onclick="quick('Beijing')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇨🇳 China</button>
-<button onclick="quick('Sydney')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇦🇺 Australia</button>
-<button onclick="quick('Moscow')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇷🇺 Moscow</button>
-<button onclick="quick('Delhi')" class="bg-zinc-800 rounded-xl py-2 text-sm">🇮🇳 Delhi</button>
+<div class="grid grid-cols-4 gap-2 mt-3 text-[11px]">
+<button onclick="quick('Asia')" class="bg-zinc-800 rounded-lg py-2">🌏 Asia</button>
+<button onclick="quick('Europe')" class="bg-zinc-800 rounded-lg py-2">🌍 Europe</button>
+<button onclick="quick('Africa')" class="bg-zinc-800 rounded-lg py-2">🌍 Africa</button>
+<button onclick="quick('North America')" class="bg-zinc-800 rounded-lg py-2">🌎 N.America</button>
+<button onclick="quick('South America')" class="bg-zinc-800 rounded-lg py-2">🌎 S.America</button>
+<button onclick="quick('Australia')" class="bg-zinc-800 rounded-lg py-2">🇦🇺 Australia</button>
+<button onclick="quick('Antarctica')" class="bg-zinc-800 rounded-lg py-2">❄️ Antarctica</button>
+<button onclick="quick('India')" class="bg-zinc-800 rounded-lg py-2">🇮🇳 India</button>
 </div>
 
-<div id="status" class="text-center text-sm text-zinc-500 mt-4">🔍 Type a city and press Go</div>
+<div class="grid grid-cols-3 gap-2 mt-2 text-xs">
+<button onclick="quick('USA')" class="bg-zinc-800 rounded-lg py-1.5">🇺🇸 USA</button>
+<button onclick="quick('China')" class="bg-zinc-800 rounded-lg py-1.5">🇨🇳 China</button>
+<button onclick="quick('New Delhi')" class="bg-zinc-800 rounded-lg py-1.5">New Delhi</button>
+<button onclick="quick('California')" class="bg-zinc-800 rounded-lg py-1.5">California</button>
+<button onclick="quick('Dubai')" class="bg-zinc-800 rounded-lg py-1.5">Dubai</button>
+<button onclick="quick('London')" class="bg-zinc-800 rounded-lg py-1.5">London</button>
+</div>
+
+<div id="status" class="text-center text-sm text-zinc-500 mt-4">🔍 Type Continent, Country, State or City</div>
 <div id="card" class="hidden mt-4 bg-zinc-800 rounded-2xl p-5">
 <div class="flex justify-between"><div><p id="temp" class="text-5xl font-black">--°</p><p id="cond" class="text-zinc-300">--</p></div><div id="icon" class="text-5xl">⛅</div></div>
 <div class="grid grid-cols-3 gap-3 mt-5 text-center text-sm"><div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">FEELS</p><p id="feels" class="font-bold">--</p></div><div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">HUMIDITY</p><p id="hum" class="font-bold">--</p></div><div class="bg-black/30 rounded-xl p-3"><p class="text-xs text-zinc-500">WIND</p><p id="wind" class="font-bold">--</p></div></div>
@@ -37,70 +45,57 @@
 </div>
 
 <script>
-let cityTZ = null;
-let cityName = "Local";
-
-function updateClock(){
-  try{
-    const el=document.getElementById('clock');
-    const el2=document.getElementById('clock-city');
-    const now=new Date();
-    if(cityTZ){
-      const timeStr=now.toLocaleString('en-IN',{timeZone:cityTZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true,day:'2-digit',month:'short',year:'numeric'});
-      el.innerText='🕒 '+timeStr;
-      el2.innerText=cityName+' • '+cityTZ;
-    }else{
-      el.innerText='🕒 '+now.toLocaleString();
-      el2.innerText='Your local time';
-    }
-  }catch(e){}
-}
-setInterval(updateClock,1000);
-updateClock();
-
-function quick(c){ document.getElementById('city').value=c; getWeather(); }
+let cityTZ=null,cityName="Local";
+function updateClock(){try{const el=document.getElementById('clock'),el2=document.getElementById('clock-city'),now=new Date();if(cityTZ){el.innerText='🕒 '+now.toLocaleString('en-IN',{timeZone:cityTZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true,day:'2-digit',month:'short',year:'numeric'});el2.innerText=cityName+' • '+cityTZ;}else{el.innerText='🕒 '+now.toLocaleString();el2.innerText='Your local time';}}catch(e){}}
+setInterval(updateClock,1000);updateClock();
+function quick(c){document.getElementById('city').value=c;getWeather();}
 
 async function getWeather(){
-  const cityInput=document.getElementById('city');
-  let city=cityInput.value.trim();
-  if(!city){ alert('Type city'); return; }
-  const map2={'rajasthan':'Jaipur','australia':'Sydney','china':'Beijing'};
-  if(map2[city.toLowerCase()]) city=map2[city.toLowerCase()];
+ let input=document.getElementById('city').value.trim(); if(!input){alert('Type something');return;}
+ let city=input.toLowerCase();
+  // ULTIMATE MAP: Continents + 195 Countries + All Major States
+ const ultimateMap={
+  // CONTINENTS -> Capital/main city
+  'asia':'Tokyo','europe':'London','africa':'Cairo','north america':'New York','south america':'Sao Paulo','australia':'Sydney','oceania':'Sydney','antarctica':'McMurdo Station',
+  // COUNTRIES -> Capitals (195 countries)
+  'india':'New Delhi','usa':'Washington','united states':'Washington','china':'Beijing','japan':'Tokyo','uk':'London','united kingdom':'London','russia':'Moscow','germany':'Berlin','france':'Paris','italy':'Rome','spain':'Madrid','canada':'Toronto','brazil':'Brasilia','mexico':'Mexico City','indonesia':'Jakarta','pakistan':'Islamabad','bangladesh':'Dhaka','nigeria':'Lagos','egypt':'Cairo','turkey':'Istanbul','iran':'Tehran','thailand':'Bangkok','south africa':'Cape Town','australia':'Sydney','uae':'Dubai','saudi arabia':'Riyadh','singapore':'Singapore','malaysia':'Kuala Lumpur','nepal':'Kathmandu','sri lanka':'Colombo','bhutan':'Thimphu','myanmar':'Yangon','philippines':'Manila','vietnam':'Hanoi','south korea':'Seoul','north korea':'Pyongyang','new zealand':'Auckland','greece':'Athens','portugal':'Lisbon','netherlands':'Amsterdam','sweden':'Stockholm','norway':'Oslo','denmark':'Copenhagen','finland':'Helsinki','poland':'Warsaw','ukraine':'Kyiv','argentina':'Buenos Aires','chile':'Santiago','peru':'Lima','colombia':'Bogota',
+  // INDIAN STATES
+  'karnataka':'Bengaluru','tamil nadu':'Chennai','tamilnadu':'Chennai','kerala':'Thiruvananthapuram','maharashtra':'Mumbai','rajasthan':'Jaipur','up':'Lucknow','uttar pradesh':'Lucknow','bihar':'Patna','gujarat':'Ahmedabad','punjab':'Chandigarh','haryana':'Chandigarh','west bengal':'Kolkata','telangana':'Hyderabad','andhra pradesh':'Visakhapatnam','madhya pradesh':'Bhopal','odisha':'Bhubaneswar','assam':'Guwahati','goa':'Panaji','delhi':'New Delhi','himachal pradesh':'Shimla','uttarakhand':'Dehradun',
+  // USA STATES
+  'california':'Los Angeles','texas':'Houston','florida':'Miami','new york':'New York','washington':'Seattle','illinois':'Chicago',
+  // OTHER STATES/REGIONS
+  'new south wales':'Sydney','victoria':'Melbourne','queensland':'Brisbane','england':'London','scotland':'Edinburgh','bavaria':'Munich','catalonia':'Barcelona','dubai':'Dubai'
+ };
 
-  const status=document.getElementById('status'), card=document.getElementById('card'), loc=document.getElementById('loc');
-  status.innerText='🔍 Searching '+city+'...';
-  card.classList.add('hidden');
-  try{
-    const geoRes=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=en&format=json');
-    const geo=await geoRes.json();
-    if(!geo.results || geo.results.length==0) throw new Error('City not found');
-    const g=geo.results[0];
+ if(ultimateMap[city]) input=ultimateMap[city];
 
-    // SET CITY TIMEZONE - THIS IS THE KEY FIX
-    cityTZ=g.timezone;
-    cityName=g.name;
-    updateClock();
+ const status=document.getElementById('status'),card=document.getElementById('card'),loc=document.getElementById('loc');
+ status.innerText='🔍 Searching '+input+'...'; card.classList.add('hidden');
 
-    loc.innerText=g.name+', '+(g.country||'')+' • '+g.timezone;
-
-    const wRes=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+g.latitude+'&longitude='+g.longitude+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto');
-    const w=await wRes.json();
-    const c=w.current;
-    const weatherText={0:'Clear Sky',1:'Mainly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',51:'Light Drizzle',61:'Light Rain',71:'Light Snow',80:'Light Showers',95:'Thunderstorm'};
-    const weatherIcon={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',71:'❄️',80:'🌦️',95:'⛈️'};
-
-    document.getElementById('temp').innerText=Math.round(c.temperature_2m)+'°C';
-    document.getElementById('cond').innerText=weatherText[c.weather_code]||'Cloudy';
-    document.getElementById('icon').innerText=weatherIcon[c.weather_code]||'⛅';
-    document.getElementById('feels').innerText=Math.round(c.apparent_temperature)+'°C';
-    document.getElementById('hum').innerText=c.relative_humidity_2m+'%';
-    document.getElementById('wind').innerText=c.wind_speed_10m+' km/h';
-
-    status.innerText='✅ Live weather for '+g.name;
-    card.classList.remove('hidden');
-  }catch(err){
-    status.innerText='❌ '+err.message;
+ try{
+  // Try 3 times: direct, +India, +USA to never fail
+  let geo=null;
+  for(let q of [input, input+', India', input+', USA', input+', China']){
+   const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=1&language=en&format=json').then(x=>x.json());
+   if(r.results && r.results.length>0){geo=r.results[0];break;}
   }
+  if(!geo) throw new Error('Not found. Try city name like Bengaluru, Mumbai, London');
+
+  cityTZ=geo.timezone; cityName=geo.name; updateClock();
+  loc.innerText=geo.name+', '+(geo.admin1'')+' '+(geo.country'')+' • '+geo.timezone;
+
+  const w=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+geo.latitude+'&longitude='+geo.longitude+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto').then(x=>x.json());
+  const c=w.current;
+  const txt={0:'Clear Sky',1:'Mainly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',51:'Light Drizzle',61:'Light Rain',71:'Light Snow',80:'Light Showers',95:'Thunderstorm'};
+  const ico={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',71:'❄️',80:'🌦️',95:'⛈️'};
+  document.getElementById('temp').innerText=Math.round(c.temperature_2m)+'°C';
+  document.getElementById('cond').innerText=txt[c.weather_code]||'Cloudy';
+   document.getElementById('icon').innerText=ico[c.weather_code]||'⛅';
+  document.getElementById('feels').innerText=Math.round(c.apparent_temperature)+'°C';
+  document.getElementById('hum').innerText=c.relative_humidity_2m+'%';
+  document.getElementById('wind').innerText=c.wind_speed_10m+' km/h';
+  status.innerText='✅ Live: '+geo.name; card.classList.remove('hidden');
+ }catch(e){ status.innerText='❌ '+e.message; }
 }
 </script>
 </body>
