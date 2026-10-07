@@ -44,7 +44,11 @@
 
 <script>
 let currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-function updateClock(tz){
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').innerHTML = '🕒 ' + now.toLocaleTimeString() + ' • ' + now.toDateString();
+}
+setInterval(updateClock,1000);
   const zone = tz || currentTZ;
   const now = new Date().toLocaleString('en-IN', {timeZone: zone, weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
   const el=document.getElementById('clock');
@@ -68,7 +72,6 @@ async function getWeather(){
   let geo=await fetch(https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json).then(r=>r.json());
   if(!geo.results) throw new Error('City not found');
   let g=geo.results[0];
-  currentTZ=g.timezone; updateClock(g.timezone);
   loc.textContent=g.name+', '+(g.admin1'')+' '+(g.country'')+' • '+g.latitude.toFixed(2)+','+g.longitude.toFixed(2);
   let w=await fetch(https://api.open-meteo.com/v1/forecast?latitude=${g.latitude}&longitude=${g.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto).then(r=>r.json());
   let c=w.current;
