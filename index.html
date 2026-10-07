@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Weather World</title>
+<title>Weather World - World Clock</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-black text-white min-h-screen flex items-center justify-center p-4">
 <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
 <h1 class="text-2xl font-bold text-center">🌍 Weather World</h1>
 <p id="loc" class="text-zinc-400 text-sm text-center mt-1">Type a city and press Go</p>
-<p id="clock" class="text-violet-400 text-center font-bold mt-2">🕒 Loading...</p>
+<p id="clock" class="text-violet-400 text-center font-bold mt-2 text-lg">🕒 --:--:--</p>
+<p id="clock-city" class="text-zinc-500 text-center text-xs">Local time</p>
 
 <div class="flex gap-2 mt-4">
 <input id="city" placeholder="Search... e.g. Beijing" class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none">
@@ -36,11 +37,22 @@
 </div>
 
 <script>
-// SIMPLE CLOCK - 100% working
+let cityTZ = null;
+let cityName = "Local";
+
 function updateClock(){
   try{
-    const d=new Date();
-    document.getElementById('clock').innerText='🕒 '+d.toLocaleString();
+    const el=document.getElementById('clock');
+    const el2=document.getElementById('clock-city');
+    const now=new Date();
+    if(cityTZ){
+      const timeStr=now.toLocaleString('en-IN',{timeZone:cityTZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true,day:'2-digit',month:'short',year:'numeric'});
+      el.innerText='🕒 '+timeStr;
+      el2.innerText=cityName+' • '+cityTZ;
+    }else{
+      el.innerText='🕒 '+now.toLocaleString();
+      el2.innerText='Your local time';
+    }
   }catch(e){}
 }
 setInterval(updateClock,1000);
@@ -51,20 +63,25 @@ function quick(c){ document.getElementById('city').value=c; getWeather(); }
 async function getWeather(){
   const cityInput=document.getElementById('city');
   let city=cityInput.value.trim();
-  if(!city){ alert('Type a city name'); return; }
+  if(!city){ alert('Type city'); return; }
   const map2={'rajasthan':'Jaipur','australia':'Sydney','china':'Beijing'};
   if(map2[city.toLowerCase()]) city=map2[city.toLowerCase()];
 
   const status=document.getElementById('status'), card=document.getElementById('card'), loc=document.getElementById('loc');
   status.innerText='🔍 Searching '+city+'...';
   card.classList.add('hidden');
-
   try{
     const geoRes=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=en&format=json');
     const geo=await geoRes.json();
     if(!geo.results || geo.results.length==0) throw new Error('City not found');
     const g=geo.results[0];
-    loc.innerText=g.name+', '+(g.country||'');
+
+    // SET CITY TIMEZONE - THIS IS THE KEY FIX
+    cityTZ=g.timezone;
+    cityName=g.name;
+    updateClock();
+
+    loc.innerText=g.name+', '+(g.country||'')+' • '+g.timezone;
 
     const wRes=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+g.latitude+'&longitude='+g.longitude+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto');
     const w=await wRes.json();
@@ -83,7 +100,6 @@ async function getWeather(){
     card.classList.remove('hidden');
   }catch(err){
     status.innerText='❌ '+err.message;
-    console.log(err);
   }
 }
 </script>
