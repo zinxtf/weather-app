@@ -74,7 +74,10 @@ async function getWeather(){
   }catch(e){ s.textContent='❌ '+e.message; }
 }
 document.getElementById('city').addEventListener('keydown',e=>{if(e.key==='Enter') getWeather();});
-window.onload=()=>{document.getElementById('city').value='Kolkata'; getWeather();}
+window.onload=()=>{
+  document.getElementById('city').value='';
+  document.getElementById('status').textContent='🔍 Type a city and press Go - Whole World Weather';
+}
 </script>
 </body>
 </html>
