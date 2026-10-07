@@ -52,7 +52,19 @@
 <script>
 function quick(c){document.getElementById('city').value=c; getWeather();}
 async function getWeather(){
-  let city=document.getElementById('city').value.trim(); if(!city) city='Baghpat';
+let city=document.getElementById('city').value.trim(); if(!city) city='';
+  const stateMap = {
+    'rajasthan':'Jaipur',
+    'punjab':'Chandigarh',
+    'haryana':'Gurgaon',
+    'gujarat':'Ahmedabad',
+    'maharashtra':'Mumbai',
+    'up':'Lucknow',
+    'bihar':'Patna',
+    'delhi':'Delhi'
+  };
+  let lower = city.toLowerCase();
+  if(stateMap[lower]) city = stateMap[lower];
   let s=document.getElementById('status'); let r=document.getElementById('result');
   s.textContent='🌍 Searching '+city+' across the world...'; r.classList.add('hidden');
   try{
